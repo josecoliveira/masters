@@ -1,5 +1,3 @@
-from typing import List, NewType
-
 import numpy as np
 
 
@@ -72,6 +70,18 @@ class AKV:
         self.belief_array = new_belief_array
         self.states = np.vstack((self.states, self.belief_array))
         return self.belief_array
-    
-    def polarization(self):
-        raise NotImplementedError
+
+    def get_polarization(self, k=201, K=1000, alpha=1.0):
+        pis = np.array(
+            [np.histogram(self.belief_array[:, i], bins=k) for i in range(self.k)]
+        )
+
+        def polarization(pi):
+            return K * np.sum(
+                [
+                    np.sum([pi[i] ** (1 - alpha) * pi[j] for j in range(k)])
+                    for i in range(k)
+                ]
+            )
+
+        return np.array([polarization(pis[i]) for i in range(self.k)])
